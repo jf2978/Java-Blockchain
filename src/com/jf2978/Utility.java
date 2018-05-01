@@ -10,18 +10,25 @@ import java.security.Security;
 
 public class Utility {
 
-    public static String SHA512(String input){
+    // Applies SHA-512 hash function to String input (BouncyCastle API)
+    public static String SHA512(String input) {
+        // Providers manage particular algorithms to implementation
+        Security.addProvider(new BouncyCastleProvider()); // BouncyCastle provides the suite of ciphers/algorithms
+        StringBuffer sb = new StringBuffer();
         try{
-            Security.setProperty("crypto.policy", "unlimited");
-            Security.addProvider(new BouncyCastleProvider());
-
+            // Create digest (i.e. "signed" input via SHA-512 hash function)
             MessageDigest messageDigest = MessageDigest.getInstance("SHA-512");
             byte[] hash = messageDigest.digest(input.getBytes("UTF-8"));
-            return new String(hash, StandardCharsets.UTF_8);
-        }
-        catch(NoSuchAlgorithmException | UnsupportedEncodingException e){
+
+            // Byte -> Hex conversion
+            for(byte b : hash){
+                sb.append(String.format("%02X ", b));
+            }
+        }catch(NoSuchAlgorithmException | UnsupportedEncodingException e){
             System.out.println(e.getMessage());
         }
-        return "";
+
+
+        return sb.toString();
     }
 }
