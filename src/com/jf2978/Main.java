@@ -1,10 +1,30 @@
 package com.jf2978;
 
 import com.google.gson.GsonBuilder;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import java.security.Security;
 
 public class Main {
 
     public static void main(String[] args) {
+        Security.addProvider(new BouncyCastleProvider());
+
+        // Create wallets for both Alice and Bob
+        Wallet alice = new Wallet();
+        Wallet bob = new Wallet();
+
+        // Create a transaction from Alice to Bob + sign (disregarding transaction history for now)
+        Transaction transaction = new Transaction(alice.eK, bob.eK, 5, null);
+        transaction.sign(alice.dK);
+
+        // Verify signature
+        if(transaction.verify(alice.eK)){
+            System.out.println(" -- Transaction Verified -- ");
+        }
+
+
+        /*
         SimpleBlockChain<String> sbc = new SimpleBlockChain<>();
 
         // Intialize genesis block
@@ -30,6 +50,6 @@ public class Main {
             System.out.println("-- Blockchain Verified --");
         }
         // Print Blockchain JSON
-        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(sbc));
+        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(sbc));*/
     }
 }

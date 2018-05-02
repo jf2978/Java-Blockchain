@@ -16,6 +16,7 @@ public class SimpleBlockChain<T> {
     // Static Variables
     public static int difficulty = 2;
 
+
     // Constructor(s)
     public SimpleBlockChain(){
         blockchain = new ArrayList<>();

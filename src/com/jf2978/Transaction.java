@@ -1,5 +1,6 @@
 package com.jf2978;
 
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,5 +41,17 @@ public class Transaction {
     private String hash(){
         total++;
         return Utility.SHA512(Utility.getStringFromKey(sender) + Utility.getStringFromKey(recipient) + Double.toString(value) + total);
+    }
+
+    // Generates signature that includes transaction amount (data integrity), sender (origin authenticity), and recipient (destination authenticity)
+    public void sign(PrivateKey dK){
+        String dataToSign  = Double.toString(value) + Utility.getStringFromKey(sender) + Utility.getStringFromKey(recipient);
+        this.signature = Utility.ECDSASignature(dK, dataToSign);
+    }
+
+    // Verifies transaction signature
+    public boolean verify(PublicKey eK){
+        String dataToVerify = Double.toString(value) + Utility.getStringFromKey(sender) + Utility.getStringFromKey(recipient);
+        return Utility.verifyECDSASignature(eK, dataToVerify, signature);
     }
 }
