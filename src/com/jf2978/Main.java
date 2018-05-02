@@ -23,7 +23,7 @@ public class Main {
         Block third = new Block<>("Third Block", second.getSignature());
         third.mine(SimpleBlockChain.difficulty);
         sbc.add(third);
-        System.out.println("First Block mined!");
+        System.out.println("Third Block mined!");
 
         // Verify blockchain
         if(sbc.isValid()){

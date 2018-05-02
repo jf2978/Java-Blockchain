@@ -3,10 +3,8 @@ package com.jf2978;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.Security;
+import java.security.*;
+import java.util.Base64;
 
 public class Utility {
 
@@ -14,7 +12,7 @@ public class Utility {
     public static String SHA512(String input) {
         // Providers manage particular algorithms to implementation
         Security.addProvider(new BouncyCastleProvider()); // BouncyCastle provides the suite of ciphers/algorithms
-        StringBuffer sb = new StringBuffer();
+        StringBuffer sb = new StringBuffer(); // StringBuffer used for future thread-safe use
         try{
             // Create digest (i.e. "signed" input via SHA-512 hash function)
             MessageDigest messageDigest = MessageDigest.getInstance("SHA-512");
@@ -28,7 +26,11 @@ public class Utility {
             System.out.println(e.getMessage());
         }
 
-
         return sb.toString();
+    }
+
+    // Public/Private Key -> String
+    public static String getStringFromKey(Key key) {
+        return Base64.getEncoder().encodeToString(key.getEncoded());
     }
 }
