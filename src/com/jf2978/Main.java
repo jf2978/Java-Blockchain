@@ -12,12 +12,21 @@ public class Main {
 
         // Create wallets for both Alice and Bob
         Wallet alice = new Wallet();
+        System.out.println("Wallet created for Alice!");
+        System.out.println(alice.eK);
+        System.out.println(alice.dK);
         Wallet bob = new Wallet();
+        System.out.println("Wallet created for Bob!");
+        System.out.println(bob.eK);
+        System.out.println(bob.dK);
 
         // Create a transaction from Alice to Bob + sign (disregarding transaction history for now)
         Transaction transaction = new Transaction(alice.eK, bob.eK, 5, null);
         transaction.sign(alice.dK);
 
+        System.out.println(transaction.toString());
+
+        /*
         // Verify signature
         if(transaction.verify(alice.eK)){
             System.out.println(" -- Transaction Verified -- ");

@@ -6,20 +6,22 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SimpleBlockChain<T> {
 
-    // Instance Variables
-    private List<Block> blockchain;
-
     // Static Variables
-    public static int difficulty = 2;
-
+    public static List<Block> blockchain;
+    public static Map<String, TransactionOutput> UTXOs; // map of <id, TransactionOutput>
+    public static int difficulty = 2; // # of 0s needed to solve PoW
+    public static float minimumTransaction = 0.1f;
 
     // Constructor(s)
     public SimpleBlockChain(){
         blockchain = new ArrayList<>();
+        UTXOs = new HashMap<>();
     }
 
     // Adds block to chain

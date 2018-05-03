@@ -59,4 +59,5 @@ public class Utility {
     public static String getStringFromKey(Key key) {
         return Base64.getEncoder().encodeToString(key.getEncoded());
     }
+
 }
