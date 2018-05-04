@@ -4,10 +4,11 @@ import java.security.PublicKey;
 
 public class TransactionOutput{
 
-    public String id;
+    // Instance Variables
+    public String id; // TX hash
+    public String parentId; // TX hash that produced this output
+    public float value; // specified output amount for this
     public PublicKey recipient; // recipient of the amount specified
-    public float value;
-    public String parentId; //
 
     // Constructor(s)
     public TransactionOutput(PublicKey from, float val, String parent){
@@ -23,6 +24,19 @@ public class TransactionOutput{
     }
 
     private String hash(){
-        return Utility.SHA512(Utility.getStringFromKey(recipient) + Float.toString(value) + parentId);
+        return Utility.SHA512(this.simplify());
+    }
+
+    // Method for compressing TransactionOutput information as String (for TXO hash)
+    private String simplify(){
+        return Utility.getStringFromKey(recipient) + Float.toString(value) + parentId;
+    }
+
+    // Method for returning human-readable form of this transaction output
+    public String toString(){
+        return "Origin TX Hash: " + parentId + '\n' +
+                "To: " + Utility.getStringFromKey(recipient) + '\n' +
+                "Amount: " + Float.toString(value) + '\n' +
+                "TX Hash: " + id;
     }
 }

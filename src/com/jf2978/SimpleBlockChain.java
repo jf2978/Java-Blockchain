@@ -4,19 +4,16 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SimpleBlockChain<T> {
 
     // Static Variables
     public static List<Block> blockchain;
-    public static Map<String, TransactionOutput> UTXOs; // map of <id, TransactionOutput>
-    public static int difficulty = 2; // # of 0s needed to solve PoW
-    public static float minimumTransaction = 0.1f;
+    public static Map<PublicKey, Set<TransactionOutput>> UTXOs; // map of <eK, UTXOs>
+    public static int difficulty = 2; // "# of 0s" needed to solve PoW
 
     // Constructor(s)
     public SimpleBlockChain(){

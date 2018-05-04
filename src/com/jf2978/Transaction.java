@@ -10,16 +10,16 @@ public class Transaction {
     private static int total = 0; // number of transactions generated, to be used within our hash to differentiate duplicates (think CTR Mode of operation)
 
     //Instance Variables
-    String id; // unique id hash for this transaction
+    String id; // TX hash for this transaction
     public PublicKey sender;
     public PublicKey recipient;
     public float value; // amount to send
     public byte[] signature; // digital signature to verify
 
-    public Set<TransactionInput> inputs; // previous transactions of sender
+    public Set<TransactionOutput> inputs; // previous transaction outputs of sender (to be spent for this transaction)
     public Set<TransactionOutput> outputs; // resulting transaction outputs (including change)
 
-    public Transaction(PublicKey from, PublicKey to, float val, Set<TransactionInput> in){
+    public Transaction(PublicKey from, PublicKey to, float val, Set<TransactionOutput> in){
         sender = from;
         recipient = to;
         value = val;
@@ -51,37 +51,38 @@ public class Transaction {
             return false;
         }
 
-        // Filter through TransactionInputs + assign values to transaction outputs if in Blockchain unspent map
-        System.out.println("Searching for unspent Transaction Inputs ...");
-        for(TransactionInput input : inputs){
-            input.UTXO = SimpleBlockChain.UTXOs.get(input.id);
+        // Check that inputs are all UTXOs for this sender
+        if(!inputs.containsAll(SimpleBlockChain.UTXOs.get(sender))){
+            System.out.println("Transaction inputs are invalid...");
+            return false;
         }
 
-        // check if transaction inputs sum to a value large enough to process transaction amount
+        // check if inputs sum to a value large enough to process transaction amount
         float sum = getInputsValue();
         if(sum < value) {
             System.out.printf("Available input (%f) too low for amount (%f)\n", sum, value);
             return false;
         }
 
-        // Create new TransactionOutputs
+        // Generate TransactionOutput(s)
         float change = sum - value;
         outputs.add(new TransactionOutput(recipient, value, id));
         if(change > 0){
             outputs.add(new TransactionOutput(sender, change, id));
         }
+
+        // Update UTXOs map by removing used TransactonOutputs + adding newly generated ones
+        SimpleBlockChain.UTXOs.get(sender).removeAll(inputs);
+        SimpleBlockChain.UTXOs.get(sender).addAll(outputs);
+
         return true;
-
-        // Update Unspent Transactions Map
-
     }
 
-    //returns sum of inputs(UTXOs) values
+    // returns sum of inputs(UTXOs) values
     public float getInputsValue() {
         float total = 0;
-        for(TransactionInput i : inputs) {
-            if(i.UTXO == null) continue; //if Transaction can't be found skip it
-            total += i.UTXO.value;
+        for(TransactionOutput i : inputs) {
+            total += i.value;
         }
         return total;
     }
@@ -96,6 +97,7 @@ public class Transaction {
         return "From: " + Utility.getStringFromKey(sender) + '\n' +
                 "To: " + Utility.getStringFromKey(recipient) + '\n' +
                 "Amount: " + Float.toString(value) + '\n' +
-                "Transaction Count: " + total;
+                "Transaction Count: " + total + '\n' +
+                "TX Hash: " + id;
     }
 }
