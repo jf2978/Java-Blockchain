@@ -4,7 +4,9 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.io.UnsupportedEncodingException;
 import java.security.*;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 public class Utility {
 
@@ -60,4 +62,18 @@ public class Utility {
         return Base64.getEncoder().encodeToString(key.getEncoded());
     }
 
+    // Generate merkle root (hash value) from given list of transactions
+    public static String getMerkleRoot(List<Transaction> transactions){
+        int size = transactions.size();
+
+        // Collect list of transaction hashes to build the merkle tree
+        List<String> TXs = new ArrayList<>();
+        for(Transaction t : transactions){
+            TXs.add(t.id);
+        }
+
+        // Calculate each node by concatenating each pair of transaction hashes
+
+        return "";
+    }
 }

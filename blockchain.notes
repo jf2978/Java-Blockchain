@@ -1,0 +1,32 @@
+
+Jeffrey Fabian
+May 2018
+
+------------------------------------------------------------
+    Understanding Blockchain + Bitcoin Protocol
+-----------------------------------------------------------
+
+
+1. What is Distributed Computing + What is a Distributed System?
+
+2. What is merkle root (merkle tree)?
+	a. A merkle tree (or hash tree) is a verification tree data structure such that every data block
+works its way up the tree (leaf -> parent directon) as hashes of their respective children:
+
+		 [H(a+b+c+d)] = root hash (master hash)
+		/			\
+   [H(a+b)]		   [H(c+d)]
+	/	\			/	\			
+[H(a)]	[H(b)]	[H(c)]	[H(d)] 
+  |		  |		  |	      |
+[ a ]	[ b ]	[ c ]	[ d ] = Data Blocks
+
+	b. `How are these useful in the context of Bitcoin?` Merkle trees offer a solution on two fronts:
+1) reclaiming disk space as there is no need to actually store all the transactions that make up a block
+once the block has been buried by more blocks ahead of it (it's safe to say the spent transactions have
+been accepted by the entire network at that point); only the merkle root of the tree that contains all the
+transactions is kept. and 2) individual transactions can be verified simply by checking a single branch of
+the merkle tree of the containing block; users/businesses can store/query a simplified block structure (header 
+containing previous hash, nonce and merkle root), and look through the merkle root to verify a transaction.
+
+
