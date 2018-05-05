@@ -20,6 +20,8 @@ public class Transaction {
     public Set<TransactionOutput> inputs; // previous transaction outputs of sender (to be spent for this transaction)
     public Set<TransactionOutput> outputs; // resulting transaction outputs (including change)
 
+    // Constructor(s)
+    // Input + Output Transaction constructor
     public Transaction(PublicKey from, PublicKey to, float val, Set<TransactionOutput> in){
         sender = from;
         recipient = to;
@@ -27,6 +29,16 @@ public class Transaction {
         inputs = in;
         outputs = new HashSet<>();
         id = hash();
+    }
+
+    // Genesis Transaction - Hardcoded id, auto-generate Transaction output since there are no inputs to process
+    public Transaction(PublicKey from, PublicKey to, float val){
+        id = "0";
+        sender = from;
+        recipient = to;
+        value = val;
+        outputs = new HashSet<>();
+        outputs.add(new TransactionOutput(recipient, value, id));
     }
 
     // Generates cryptographic (unique) id for this transaction using SHA-512 hash
@@ -61,6 +73,7 @@ public class Transaction {
 
         // check if inputs sum to a value large enough to process transaction amount
         float sum = getInputsValue();
+        // float fee = Utility.calculateFee(value); // include fee rate
         if(sum < value) {
             System.out.printf("Available input (%f) too low for amount (%f)\n", sum, value);
             return false;
@@ -69,13 +82,18 @@ public class Transaction {
         // Generate TransactionOutput(s)
         float change = sum - value;
         outputs.add(new TransactionOutput(recipient, value, id));
+        // Do something with transaction fee here
         if(change > 0){
             outputs.add(new TransactionOutput(sender, change, id));
         }
 
-        // Update UTXOs map by removing used TransactonOutputs + adding newly generated ones
+        // Remove spent Transaction Outputs from UTXOs map
         SimpleBlockChain.UTXOs.get(sender).removeAll(inputs);
-        SimpleBlockChain.UTXOs.get(sender).addAll(outputs);
+
+        // Add new Transaction Outputs to recipients
+        for(TransactionOutput output : outputs){
+            SimpleBlockChain.UTXOs.get(output.recipient).add(output);
+        }
 
         return true;
     }

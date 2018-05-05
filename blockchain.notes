@@ -29,4 +29,16 @@ transactions is kept. and 2) individual transactions can be verified simply by c
 the merkle tree of the containing block; users/businesses can store/query a simplified block structure (header 
 containing previous hash, nonce and merkle root), and look through the merkle root to verify a transaction.
 
+3. How should transaction fees work?
+	a. My initial thought goes to making transaction fees be a flexible amount based on the average amount
+ever sent on the network. That is, if you use the network for more expensive payments on average, your fee
+will be larger. Is this the right approach?
+
+	1. Greater fees mean greater incentive for miners to include for those who put spend more (+)
+	2. Marginally more expensive payments depending on how much a Wallet typically spends (this seems
+	fair to me given larger/equal fees for smaller casual payments make less sense)
+
+	b. A part of me thinks every users fees should be calculates individually - kind of like a personal tax 
+	based a bunch of factors: wallet balance (higher income = higher fee can afford), residence country human 
+	development index (higher HDI = higher fee can afford), etc. 
 

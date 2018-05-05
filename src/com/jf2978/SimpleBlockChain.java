@@ -12,19 +12,21 @@ public class SimpleBlockChain<T> {
 
     // Static Variables
     public static List<Block> blockchain;
-    public static Map<PublicKey, Set<TransactionOutput>> UTXOs; // map of <eK, UTXOs>
+    public static Map<PublicKey, Set<TransactionOutput>> UTXOs; // map of public key -> unspent transaction outputs
+    public static Map<PublicKey, Float> fees; // map of individualized fee rates; public key -> rate
     public static int difficulty = 2; // "# of 0s" needed to solve PoW
 
     // Constructor(s)
     public SimpleBlockChain(){
         blockchain = new ArrayList<>();
         UTXOs = new HashMap<>();
+        fees = new HashMap<>();
     }
 
     // Adds block to chain
-    public static void add(Block b) {
-        b.mine(difficulty);
-        blockchain.add(b);
+    public static void add(Block block) {
+        block.mine(difficulty);
+        blockchain.add(block);
     }
 
     // (Getter) Returns internal blockchain size

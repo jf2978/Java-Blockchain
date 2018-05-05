@@ -64,16 +64,27 @@ public class Utility {
 
     // Generate merkle root (hash value) from given list of transactions
     public static String getMerkleRoot(List<Transaction> transactions){
-        int size = transactions.size();
 
-        // Collect list of transaction hashes to build the merkle tree
-        List<String> TXs = new ArrayList<>();
+        // Populate list of transaction hashes to build the first level of merkle tree
+        List<String> TXHashes = new ArrayList<>();
         for(Transaction t : transactions){
-            TXs.add(t.id);
+            TXHashes.add(t.id);
         }
 
         // Create new Merkle Tree + return root hash
-        MerkleTree merkleTree = new MerkleTree(TXs);
+        MerkleTree merkleTree = new MerkleTree(TXHashes);
         return merkleTree.getRoot().hash;
+    }
+
+    // Progressive fee calculations -
+    public static float calculateFee(float amount){
+        // If a "casual" payment (arbitrary limit for now), no fee attached
+        if(amount < 50f){
+            return 0f;
+        }
+        // Placeholder for individual progressive fee
+        else{
+            return 0.1f;
+        }
     }
 }

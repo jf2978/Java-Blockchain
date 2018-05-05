@@ -36,9 +36,15 @@ public class MerkleTree {
 
     // Wrapper method to initially construct a merkle tree from a list of signatures
     private void constructTree(List<String> signatures) {
-        /*if (signatures.size() <= 1) {
-            throw new IllegalArgumentException("Must be at least two signatures to construct a Merkle tree");
-        }*/
+        // If no signatures present throw exception
+        if(signatures.size() == 0){
+            throw new IllegalArgumentException("Must provide at least transaction signature to construct Merkle Tree");
+        }
+
+        // If only one transaction, return as root node
+        if(signatures.size() == 1){
+            root = new Node(signatures.get(0));
+        }
 
         List<Node> parents = constructBase(signatures);
         root = constructInternal(parents);
@@ -69,14 +75,13 @@ public class MerkleTree {
     // Constructs every subsequent level of the tree recursively -> returns root
     private Node constructInternal(List<Node> parents){
 
-        // Base case: merkle root found
+        // Base case: root found
         if(parents.size() == 1){
             return parents.get(0);
         }
 
-        boolean odd = parents.size() % 2 != 0;
-
         // Generate immediate parents
+        boolean odd = parents.size() % 2 != 0;
         for(int i = 1; i < parents.size(); i += 2){
             Node left = parents.get(i-1);
             Node right = parents.get(i);

@@ -11,14 +11,11 @@ public class Wallet {
     // Instance variables
     public PublicKey eK; // *Anybody can pay* to your wallet via your public (encrypt) key - share your public key
     public PrivateKey dK; // *Nobody can use* your wallet via your private (decrypt) key - sign with your private key
-
-    // Static variables
-    public static Set<TransactionOutput> UTXOs; // Unspent transaction outputs associated to this public key
+    public Set<TransactionOutput> UTXOs; // Unspent transaction outputs associated to this public key
 
     // Constructor(s)
     public Wallet(){
         keyGen();
-        UTXOs = SimpleBlockChain.UTXOs.get(eK);
     }
 
     // Generates pair of public/private keys using the Elliptic-Curve Algorithm
@@ -44,6 +41,9 @@ public class Wallet {
     }
 
     public float balance(){
+        // Get updated Unspent transactions for this public key
+        UTXOs = SimpleBlockChain.UTXOs.get(eK);
+
         float balance = 0;
         for(TransactionOutput output : UTXOs){
             balance += output.value;
@@ -71,7 +71,7 @@ public class Wallet {
         }
         System.out.printf("Sending %f using TX Inputs: %s", value, inputs);
 
-        // Update UTXOs set accordingly
+        // Update UTXOs set + balance amount accordingly
         UTXOs.removeAll(inputs);
 
         // Generate, sign and return new Transaction object

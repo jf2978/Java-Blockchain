@@ -32,7 +32,7 @@ public class Block {
     // Simulates "mining" to establish proof-of-work concept to verify blocks
     public void mine(int diff){
         merkleRoot = Utility.getMerkleRoot(transactions);
-        String target = StringUtils.leftPad("", diff, '0');
+        String target = StringUtils.leftPad("", diff, '0'); // Appends diff * ('0') to ""
         int count = 0;
         while(!signature.substring(0, diff).equals(target)) {
             System.out.printf("Attempt %d: %s\n", count, signature);
@@ -40,14 +40,12 @@ public class Block {
             signature = hash();
             count++;
         }
-        System.out.println("Mining Successful: " + signature    );
+        System.out.println("Mining Successful: " + signature);
     }
 
     public boolean addTransaction(Transaction t){
         // Null check
-        if(t == null){
-            return false;
-        }
+        if(t == null){ return false; }
 
         // Check if not genesis block
         if(!previousHash.equals("0")){
