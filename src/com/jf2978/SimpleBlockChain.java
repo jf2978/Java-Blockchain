@@ -22,7 +22,8 @@ public class SimpleBlockChain<T> {
     }
 
     // Adds block to chain
-    public void add(Block b) {
+    public static void add(Block b) {
+        b.mine(difficulty);
         blockchain.add(b);
     }
 

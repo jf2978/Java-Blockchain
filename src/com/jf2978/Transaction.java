@@ -2,6 +2,7 @@ package com.jf2978;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.HashSet;
 import java.util.Set;
 
 public class Transaction {
@@ -24,6 +25,7 @@ public class Transaction {
         recipient = to;
         value = val;
         inputs = in;
+        outputs = new HashSet<>();
         id = hash();
     }
 

@@ -11,8 +11,8 @@ public class TransactionOutput{
     public PublicKey recipient; // recipient of the amount specified
 
     // Constructor(s)
-    public TransactionOutput(PublicKey from, float val, String parent){
-        recipient = from;
+    public TransactionOutput(PublicKey to, float val, String parent){
+        recipient = to;
         value = val;
         parentId = parent;
         id = hash();

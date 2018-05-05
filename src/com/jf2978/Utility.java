@@ -72,8 +72,8 @@ public class Utility {
             TXs.add(t.id);
         }
 
-        // Calculate each node by concatenating each pair of transaction hashes
-
-        return "";
+        // Create new Merkle Tree + return root hash
+        MerkleTree merkleTree = new MerkleTree(TXs);
+        return merkleTree.getRoot().hash;
     }
 }

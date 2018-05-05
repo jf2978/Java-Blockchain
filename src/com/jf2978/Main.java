@@ -9,56 +9,34 @@ public class Main {
 
     public static void main(String[] args) {
         Security.addProvider(new BouncyCastleProvider());
+        SimpleBlockChain sbc = new SimpleBlockChain();
 
-        // Create wallets for both Alice and Bob
+        // Create wallets for Alice + Bob
         Wallet alice = new Wallet();
         System.out.println("Wallet created for Alice!");
-        System.out.println(alice.eK);
-        System.out.println(alice.dK);
+        System.out.println("Public Key: " + alice.eK);
         Wallet bob = new Wallet();
         System.out.println("Wallet created for Bob!");
-        System.out.println(bob.eK);
-        System.out.println(bob.dK);
+        System.out.println("Public Key: " + bob.eK);
 
-        // Create a transaction from Alice to Bob + sign (disregarding transaction history for now)
-        Transaction transaction = new Transaction(alice.eK, bob.eK, 5, null);
-        transaction.sign(alice.dK);
+        // Manually create Genesis Transaction + coinbase wallet
+        Wallet coinbase = new Wallet();
+        Transaction genesisTransaction = new Transaction(coinbase.eK, alice.eK, 100f, null);
+        genesisTransaction.sign(coinbase.dK);
+        genesisTransaction.id = "0";
+        TransactionOutput out = new TransactionOutput(genesisTransaction.recipient, genesisTransaction.value, genesisTransaction.id);
+        genesisTransaction.outputs.add(out);
+        SimpleBlockChain.UTXOs.put(coinbase.eK, genesisTransaction.outputs);
 
-        System.out.println(transaction.toString());
+        // Create Genesis block
+        Block genesis = new Block("0");
+        genesis.addTransaction(genesisTransaction);
+        SimpleBlockChain.add(genesis);
 
-        /*
-        // Verify signature
-        if(transaction.verify(alice.eK)){
-            System.out.println(" -- Transaction Verified -- ");
-        }
+        // Check balance, create a transaction from Alice -> Bob + sign
+        System.out.println("Alice Balance: " + alice.balance());
 
-
-        /*
-        SimpleBlockChain<String> sbc = new SimpleBlockChain<>();
-
-        // Intialize genesis block
-        Block gen = new Block<>("Genesis Block", "0");
-        gen.mine(SimpleBlockChain.difficulty);
-        sbc.add(gen);
-        System.out.println("First Block mined!");
-
-        // Intialize second block
-        Block second = new Block<>("Second Block", gen.getSignature());
-        second.mine(SimpleBlockChain.difficulty);
-        sbc.add(second);
-        System.out.println("Second Block mined!");
-
-        // Intialize third block
-        Block third = new Block<>("Third Block", second.getSignature());
-        third.mine(SimpleBlockChain.difficulty);
-        sbc.add(third);
-        System.out.println("Third Block mined!");
-
-        // Verify blockchain
-        if(sbc.isValid()){
-            System.out.println("-- Blockchain Verified --");
-        }
         // Print Blockchain JSON
-        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(sbc));*/
+        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(sbc));
     }
 }
