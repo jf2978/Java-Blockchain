@@ -1,5 +1,6 @@
 package com.jf2978;
 
+import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +18,7 @@ public class MerkleTree {
 
     // Nested class (Merkle) Node
     static class Node{
+
         public String hash;
         public Node left;
         public Node right;
@@ -38,12 +40,12 @@ public class MerkleTree {
     private void constructTree(List<String> signatures) {
         // If no signatures present throw exception
         if(signatures.size() == 0){
-            throw new IllegalArgumentException("Must provide at least transaction signature to construct Merkle Tree");
+            throw new IllegalArgumentException("Must provide a transaction signature to construct Merkle Tree");
         }
 
         // If only one transaction, return as root node
         if(signatures.size() == 1){
-            root = new Node(signatures.get(0));
+            root = new Node(Utility.SHA512(signatures.get(0)));
         }
 
         List<Node> parents = constructBase(signatures);
@@ -103,5 +105,9 @@ public class MerkleTree {
 
     public List<String> getLeaves(){
         return this.leaves;
+    }
+
+    public String toString(){
+        return new GsonBuilder().setPrettyPrinting().create().toJson(this);
     }
 }

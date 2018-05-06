@@ -1,5 +1,6 @@
 package com.jf2978;
 
+import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
@@ -44,8 +45,8 @@ public class Block {
     }
 
     public boolean addTransaction(Transaction t){
-        // Null check
-        if(t == null){ return false; }
+        // Valid Transaction check
+        if(t == null || t.outputs == null){ return false; }
 
         // Check if not genesis block
         if(!previousHash.equals("0")){
@@ -64,5 +65,9 @@ public class Block {
 
     public String getPreviousHash(){
         return this.previousHash;
+    }
+
+    public String toString(){
+        return new GsonBuilder().setPrettyPrinting().create().toJson(this);
     }
 }

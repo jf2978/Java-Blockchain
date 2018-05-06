@@ -1,8 +1,14 @@
 package com.jf2978;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class Transaction {
@@ -54,10 +60,13 @@ public class Transaction {
 
     // Verifies transaction signature
     public boolean verify(){
-        return Utility.verifyECDSASignature(sender, this.simplify(), signature);
+        return Utility.verifyECDSASignature(sender, id, signature);
     }
 
     public boolean process(){
+
+        // Check Unspent transactions map
+        Map<PublicKey, Set<TransactionOutput>> UTXOs = Main.SimpleBlockChain.UTXOs;
 
         // Verify the signature of this transaction
         if(!verify()){
@@ -65,36 +74,44 @@ public class Transaction {
             return false;
         }
 
-        // Check that inputs are all UTXOs for this sender
-        if(!inputs.containsAll(SimpleBlockChain.UTXOs.get(sender))){
+        // Check that inputs correspond with what's in the blockchain
+        if(!UTXOs.get(sender).containsAll(inputs)){
             System.out.println("Transaction inputs are invalid...");
             return false;
         }
 
         // check if inputs sum to a value large enough to process transaction amount
+        // TODO: float fee = Utility.calculateFee(value);
         float sum = getInputsValue();
-        // float fee = Utility.calculateFee(value); // include fee rate
         if(sum < value) {
             System.out.printf("Available input (%f) too low for amount (%f)\n", sum, value);
             return false;
         }
 
+        System.out.printf("Alice -> Bob Outputs: %s", outputs);
+
         // Generate TransactionOutput(s)
         float change = sum - value;
         outputs.add(new TransactionOutput(recipient, value, id));
-        // Do something with transaction fee here
+        System.out.printf("Alice -> Bob Outputs: %s", outputs);
+
+        // Potentially do something with transaction fee here
         if(change > 0){
             outputs.add(new TransactionOutput(sender, change, id));
         }
+        System.out.printf("Alice -> Bob Outputs: %s", outputs);
 
         // Remove spent Transaction Outputs from UTXOs map
-        SimpleBlockChain.UTXOs.get(sender).removeAll(inputs);
+        UTXOs.get(sender).removeAll(inputs);
+        System.out.printf("Alice's Wallet: %s", Main.SimpleBlockChain.UTXOs.get(sender));
 
-        // Add new Transaction Outputs to recipients
+        // Update blockchain with this set (and initializes entry if DNE for appropriate key)
         for(TransactionOutput output : outputs){
-            SimpleBlockChain.UTXOs.get(output.recipient).add(output);
+            UTXOs.putIfAbsent(output.recipient, new HashSet<>());
+            UTXOs.get(output.recipient).add(output);
         }
 
+        System.out.printf("Alice's Wallet: %s\n", Main.SimpleBlockChain.UTXOs.get(sender));
         return true;
     }
 
@@ -114,10 +131,6 @@ public class Transaction {
 
     // Method for returning human-readable form of this transaction
     public String toString(){
-        return "From: " + Utility.getStringFromKey(sender) + '\n' +
-                "To: " + Utility.getStringFromKey(recipient) + '\n' +
-                "Amount: " + Float.toString(value) + '\n' +
-                "Transaction Count: " + total + '\n' +
-                "TX Hash: " + id;
+        return new GsonBuilder().setPrettyPrinting().create().toJson(this);
     }
 }

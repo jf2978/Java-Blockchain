@@ -1,5 +1,7 @@
 package com.jf2978;
 
+import com.google.gson.GsonBuilder;
+
 import java.security.*;
 import java.security.spec.ECGenParameterSpec;
 import java.util.HashSet;
@@ -11,7 +13,6 @@ public class Wallet {
     // Instance variables
     public PublicKey eK; // *Anybody can pay* to your wallet via your public (encrypt) key - share your public key
     public PrivateKey dK; // *Nobody can use* your wallet via your private (decrypt) key - sign with your private key
-    public Set<TransactionOutput> UTXOs; // Unspent transaction outputs associated to this public key
 
     // Constructor(s)
     public Wallet(){
@@ -41,14 +42,17 @@ public class Wallet {
     }
 
     public float balance(){
-        // Get updated Unspent transactions for this public key
-        UTXOs = SimpleBlockChain.UTXOs.get(eK);
+        // Check Unspent transactions for this public key
+        Set<TransactionOutput> UTXOs = Main.SimpleBlockChain.UTXOs.get(eK);
+        if(UTXOs == null){
+            return 0f;
+        }
 
-        float balance = 0;
+        // For each Transaction Output, add its value to balance
+        float balance = 0f;
         for(TransactionOutput output : UTXOs){
             balance += output.value;
         }
-        System.out.println("Current Balance: " + balance);
         return balance;
     }
 
@@ -56,28 +60,41 @@ public class Wallet {
 
         // Check if balance is large enough
         if(balance() < value){
-            System.out.println("Insufficient funds!");
+            System.out.println("Insufficient funds");
             return null;
         }
 
         // Gather enough UTXOs to be used as "inputs" for this TX
-        float input = 0;
-        Set<TransactionOutput> inputs = new HashSet<>();
-        Iterator<TransactionOutput> it = UTXOs.iterator();
-        while(it.hasNext() && input < value){
-            TransactionOutput next = it.next();
-            inputs.add(next);
-            input += next.value;
-        }
-        System.out.printf("Sending %f using TX Inputs: %s", value, inputs);
-
-        // Update UTXOs set + balance amount accordingly
-        UTXOs.removeAll(inputs);
+        Set<TransactionOutput> inputs = getInputs(value);
 
         // Generate, sign and return new Transaction object
         Transaction transaction = new Transaction(eK, to, value, inputs);
         transaction.sign(dK);
 
         return transaction;
+    }
+
+    // Returns a list of unspent TransactionOutputs that can be used as input given a particular amount
+    public Set<TransactionOutput> getInputs(float goal){
+        float current = 0;
+        Set<TransactionOutput> result = new HashSet<>();
+        Iterator<TransactionOutput> spendable = Main.SimpleBlockChain.UTXOs.get(this.eK).iterator();
+
+        // Iterate through UTXOs for this public key until we have enough
+        while(current <= goal && spendable.hasNext()) {
+            TransactionOutput next = spendable.next();
+            result.add(next);
+            current += next.value;
+        }
+
+        return result;
+    }
+
+    public Set<TransactionOutput> getAllInputs(){
+        return Main.SimpleBlockChain.UTXOs.get(this.eK);
+    }
+
+    public String toString(){
+        return new GsonBuilder().setPrettyPrinting().create().toJson(this);
     }
 }

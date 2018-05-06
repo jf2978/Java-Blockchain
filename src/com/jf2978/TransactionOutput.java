@@ -1,5 +1,6 @@
 package com.jf2978;
 
+import com.google.gson.GsonBuilder;
 import java.security.PublicKey;
 
 public class TransactionOutput{
@@ -34,9 +35,6 @@ public class TransactionOutput{
 
     // Method for returning human-readable form of this transaction output
     public String toString(){
-        return "Origin TX Hash: " + parentId + '\n' +
-                "To: " + Utility.getStringFromKey(recipient) + '\n' +
-                "Amount: " + Float.toString(value) + '\n' +
-                "TX Hash: " + id;
+        return new GsonBuilder().setPrettyPrinting().create().toJson(this);
     }
 }

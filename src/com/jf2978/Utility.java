@@ -3,6 +3,7 @@ package com.jf2978;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -18,13 +19,13 @@ public class Utility {
         try {
             // Create digest (i.e. "signed" input via SHA-512 hash function)
             MessageDigest messageDigest = MessageDigest.getInstance("SHA-512");
-            byte[] hash = messageDigest.digest(input.getBytes("UTF-8"));
+            byte[] hash = messageDigest.digest(input.getBytes(StandardCharsets.UTF_8));
 
             // Byte -> Hex conversion
             for (byte b : hash) {
                 sb.append(String.format("%02X ", b));
             }
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+        } catch (NoSuchAlgorithmException e) {
             System.out.println(e.getMessage());
         }
         return sb.toString();
@@ -36,9 +37,9 @@ public class Utility {
         try {
             Signature dsa = Signature.getInstance("ECDSA", "BC");
             dsa.initSign(dK);
-            dsa.update(input.getBytes("UTF-8"));
+            dsa.update(input.getBytes(StandardCharsets.UTF_8));
             output = dsa.sign();
-        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeyException | UnsupportedEncodingException | SignatureException e) {
+        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeyException | SignatureException e) {
             System.out.println(e.getMessage());
         }
         return output;
@@ -49,9 +50,9 @@ public class Utility {
         try {
             Signature dsa = Signature.getInstance("ECDSA", "BC");
             dsa.initVerify(eK);
-            dsa.update(data.getBytes("UTF-8"));
+            dsa.update(data.getBytes(StandardCharsets.UTF_8));
             return dsa.verify(signature);
-        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeyException | UnsupportedEncodingException | SignatureException e) {
+        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeyException | SignatureException e) {
             System.out.println(e.getMessage());
         }
         return false;
