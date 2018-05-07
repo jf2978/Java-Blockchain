@@ -1,22 +1,40 @@
 package com.jf2978;
 
 import com.google.gson.GsonBuilder;
+
 import java.util.ArrayList;
 import java.util.List;
 
+/** =====
+ * The MerkleTree class is intended to be used as a data structure to enable succinct cryptographic verification
+ * of transactions as the merkle root contains the integrity of all signatures from its base and any one transaction
+ * can be verified in O(d) time if the location of the leaf is known.
+ *
+ * @author jf2978
+ */
 public class MerkleTree {
 
     // Instance variables
     private Node root;
     private List<String> leaves;
 
-    // Constructor(s)
+    // #####
+    // CONSTRUCTOR(S)
+    // #####
+
+    /** =====
+     * Merkle (Hash) Tree constructor that builds the tree from bottom up (leaves → root)
+     *
+     * @param signatures Public key of sender
+     */
     public MerkleTree(List<String> signatures){
         leaves = signatures;
         constructTree(leaves);
     }
 
-    // Nested class (Merkle) Node
+    /** =====
+     * Inner Node class for Merkle Tree
+     */
     static class Node{
 
         public String hash;
@@ -36,7 +54,42 @@ public class MerkleTree {
         }
     }
 
-    // Wrapper method to initially construct a merkle tree from a list of signatures
+    // #####
+    // PUBLIC METHODS
+    // #####
+
+    /** {@inheritDoc} */
+    public String toString(){
+        return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+    }
+
+    /** =====
+     * Returns the current tree root
+     *
+     * @return Tree root node
+     */
+    public Node getRoot(){
+        return this.root;
+    }
+
+    /** =====
+     * Returns tree leaves
+     *
+     * @return List of signatures (leaves)
+     */
+    public List<String> getLeaves(){
+        return this.leaves;
+    }
+
+    // #####
+    // HELPER METHODS
+    // #####
+
+    /** =====
+     * Wrapper method for validity checks and constructing both base and internal nodes of the tree
+     *
+     * @param signatures list of transaction signatures
+     */
     private void constructTree(List<String> signatures) {
         // If no signatures present throw exception
         if(signatures.size() == 0){
@@ -52,7 +105,12 @@ public class MerkleTree {
         root = constructInternal(parents);
     }
 
-    // Constructs the first level of tree -> returns first set of parent nodes
+    /** =====
+     * Constructs the first level of merkle tree from signature list
+     *
+     * @param signatures List of transaction signatures
+     * @return Base level of nodes in the tree
+     */
     private List<Node> constructBase(List<String> signatures){
         boolean odd = signatures.size() % 2 != 0;
         List<Node> parents = odd ? new ArrayList<>(signatures.size() / 2 + 1): new ArrayList<>(signatures.size() / 2);
@@ -75,39 +133,32 @@ public class MerkleTree {
     }
 
     // Constructs every subsequent level of the tree recursively -> returns root
-    private Node constructInternal(List<Node> parents){
+    /** =====
+     * Recursively constructs every level of the tree above the base
+     *
+     * @param children List of current child nodes
+     * @return Merkle tree root
+     */
+    private Node constructInternal(List<Node> children){
 
         // Base case: root found
-        if(parents.size() == 1){
-            return parents.get(0);
+        if(children.size() == 1){
+            return children.get(0);
         }
 
-        // Generate immediate parents
-        boolean odd = parents.size() % 2 != 0;
-        for(int i = 1; i < parents.size(); i += 2){
-            Node left = parents.get(i-1);
-            Node right = parents.get(i);
+        // Generate parents
+        boolean odd = children.size() % 2 != 0;
+        for(int i = 1; i < children.size(); i += 2){
+            Node left = children.get(i-1);
+            Node right = children.get(i);
             Node parent = new Node(Utility.SHA512(left.hash + right.hash), left, right);
-            parents.add(parent);
+            children.add(parent);
         }
 
         // If the number of nodes is odd, "inherit" the remaining child node (no hash needed)
         if(odd){
-            parents.add(parents.get(parents.size() - 1));
+            children.add(children.get(children.size() - 1));
         }
-
-        return constructInternal(parents);
-    }
-
-    public Node getRoot(){
-        return this.root;
-    }
-
-    public List<String> getLeaves(){
-        return this.leaves;
-    }
-
-    public String toString(){
-        return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+        return constructInternal(children);
     }
 }

@@ -2,16 +2,27 @@ package com.jf2978;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
+/** =====
+ * The Utility class is used to contain overarching static helper functions such as the hash and signature algorithms.
+ * This is used as a catch-all static class for now, but can be split if functionality becomes more expansive over
+ * time.
+ *
+ * @author jf2978
+ */
 public class Utility {
 
-    // Applies SHA-512 hash function to String input (BouncyCastle API)
+    /** =====
+     * Applies SHA-512 hash function to String input (BouncyCastle API)
+     *
+     * @param input String to hash
+     * @return Hex string output from
+     */
     public static String SHA512(String input) {
         // Providers manage particular algorithms to implementation
         Security.addProvider(new BouncyCastleProvider()); // BouncyCastle provides the suite of ciphers/algorithms
@@ -31,8 +42,14 @@ public class Utility {
         return sb.toString();
     }
 
-    // Applies Elliptic-Curve Digital Signature Algorithm (DSA) -> returns byte[]
-    public static byte[] ECDSASignature(PrivateKey dK, String input) {
+    /** =====
+     * Applies Elliptic-Curve Digital Signature Algorithm (DSA) → returns byte[]
+     *
+     * @param input String to sign
+     * @param dK Private key to sign the input with
+     * @return Signature as a byte array
+     */
+    public static byte[] ECDSASignature(String input, PrivateKey dK) {
         byte[] output = new byte[0];
         try {
             Signature dsa = Signature.getInstance("ECDSA", "BC");
@@ -45,8 +62,15 @@ public class Utility {
         return output;
     }
 
-    // Verifies ECDSA Signature
-    public static boolean verifyECDSASignature(PublicKey eK, String data, byte[] signature) {
+    /** =====
+     * Verifies ECDSA Signature
+     *
+     * @param data Expected result upon reversing signature
+     * @param eK Public key of user to be verified
+     * @param signature Signature we are verifying
+     * @return Verification result
+     */
+    public static boolean verifyECDSASignature(String data, PublicKey eK, byte[] signature) {
         try {
             Signature dsa = Signature.getInstance("ECDSA", "BC");
             dsa.initVerify(eK);
@@ -58,12 +82,22 @@ public class Utility {
         return false;
     }
 
-    // Public/Private Key -> String
+    /** =====
+     * Converts key to string
+     *
+     * @param key Input key
+     * @return Converted key to string
+     */
     public static String getStringFromKey(Key key) {
         return Base64.getEncoder().encodeToString(key.getEncoded());
     }
 
-    // Generate merkle root (hash value) from given list of transactions
+    /** =====
+     * Generate merkle root (hash value) from given list of transactions
+     *
+     * @param transactions List of transactions
+     * @return Merkle tree root
+     */
     public static String getMerkleRoot(List<Transaction> transactions){
 
         // Populate list of transaction hashes to build the first level of merkle tree
@@ -77,7 +111,15 @@ public class Utility {
         return merkleTree.getRoot().hash;
     }
 
-    // Progressive fee calculations -
+    //
+
+    /** =====
+     * Calculates transaction fees based on a income-progressive algorithm
+     *
+     * @param amount amount of transaction to calculate
+     * @return Calculated fee amount
+     */
+
     public static float calculateFee(float amount){
         // If a "casual" payment (arbitrary limit for now), no fee attached
         if(amount < 50f){

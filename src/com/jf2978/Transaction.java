@@ -1,16 +1,20 @@
 package com.jf2978;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/** =====
+ * The Transaction class represents a payment between two parties within the P2P network as described
+ * in the Bitcoin whitepaper - with a sender, recipient, value, hash for these fields, signature slot
+ * for the sender to generate and Transaction Inputs/Outputs
+ *
+ * @author jf2978
+ */
 public class Transaction {
 
     // Static Variables
@@ -26,8 +30,19 @@ public class Transaction {
     public Set<TransactionOutput> inputs; // previous transaction outputs of sender (to be spent for this transaction)
     public Set<TransactionOutput> outputs; // resulting transaction outputs (including change)
 
-    // Constructor(s)
-    // Input + Output Transaction constructor
+    // #####
+    // CONSTRUCTOR(S)
+    // #####
+
+    /** =====
+     * Transaction constructor to build this Transaction object using the given Transaction inputs, addresses
+     * and amount.
+     *
+     * @param from Public key of sender
+     * @param to Public key of recipient
+     * @param val Amount to be sent
+     * @param in Set of unspent transaction inputs to be (entirely) spent
+     */
     public Transaction(PublicKey from, PublicKey to, float val, Set<TransactionOutput> in){
         sender = from;
         recipient = to;
@@ -37,9 +52,17 @@ public class Transaction {
         id = hash();
     }
 
-    // Genesis Transaction - Hardcoded id, auto-generate Transaction output since there are no inputs to process
-    public Transaction(PublicKey from, PublicKey to, float val){
-        id = "0";
+    /** =====
+     * Transaction constructor utilized to build internal transaction objects that don't require inputs. This
+     * was intended to be used for a hardcoded coinbase transactions
+     *
+     * @param hash Hardcoded TX hash
+     * @param from Public key of sender
+     * @param to Public key of recipient
+     * @param val Amount to be sent
+     */
+    protected Transaction(String hash, PublicKey from, PublicKey to, float val){
+        id = hash;
         sender = from;
         recipient = to;
         value = val;
@@ -47,22 +70,42 @@ public class Transaction {
         outputs.add(new TransactionOutput(recipient, value, id));
     }
 
-    // Generates cryptographic (unique) id for this transaction using SHA-512 hash
-    private String hash(){
-        total++;
-        return Utility.SHA512(this.simplify());
+
+
+    // #####
+    // PUBLIC METHODS
+    // #####
+
+    /** {@inheritDoc} */
+    public String toString(){
+        return new GsonBuilder().setPrettyPrinting().create().toJson(this);
     }
 
-    // Generates signature of the hash of this transaction (providing data integrity)
+    /** =====
+     * Generates digital signature of this transaction's id (hash)
+     *
+     * @param dK Private key of the sender
+     */
     public void sign(PrivateKey dK){
-        signature = Utility.ECDSASignature(dK, id);
+        signature = Utility.ECDSASignature(id, dK);
     }
 
-    // Verifies transaction signature
+    /** =====
+     * Verifies this transaction's digital signature
+     *
+     * @return Verification result
+     */
     public boolean verify(){
-        return Utility.verifyECDSASignature(sender, id, signature);
+        return Utility.verifyECDSASignature(id, sender, signature);
     }
 
+    /** =====
+     * Processes the current transaction (ensuring an up-to-date UTXO map entry) by verifying its digital signature,
+     * checking the transaction inputs are valid, generating the transaction outputs and updating the blockchain
+     * accordingly.
+     *
+     * @return Processing result (transaction invalid if false)
+     */
     public boolean process(){
 
         // Check Unspent transactions map
@@ -88,22 +131,17 @@ public class Transaction {
             return false;
         }
 
-        System.out.printf("Alice -> Bob Outputs: %s", outputs);
-
         // Generate TransactionOutput(s)
         float change = sum - value;
         outputs.add(new TransactionOutput(recipient, value, id));
-        System.out.printf("Alice -> Bob Outputs: %s", outputs);
 
         // Potentially do something with transaction fee here
         if(change > 0){
             outputs.add(new TransactionOutput(sender, change, id));
         }
-        System.out.printf("Alice -> Bob Outputs: %s", outputs);
 
         // Remove spent Transaction Outputs from UTXOs map
         UTXOs.get(sender).removeAll(inputs);
-        System.out.printf("Alice's Wallet: %s", Main.SimpleBlockChain.UTXOs.get(sender));
 
         // Update blockchain with this set (and initializes entry if DNE for appropriate key)
         for(TransactionOutput output : outputs){
@@ -111,26 +149,43 @@ public class Transaction {
             UTXOs.get(output.recipient).add(output);
         }
 
-        System.out.printf("Alice's Wallet: %s\n", Main.SimpleBlockChain.UTXOs.get(sender));
         return true;
     }
 
-    // returns sum of inputs(UTXOs) values
-    public float getInputsValue() {
+    // #####
+    // HELPER METHODS
+    // #####
+
+    /** =====
+     * Represents this transaction as a String, used to compress the object information needed for hashing and signing
+     *
+     * @return String representation of this transaction
+     */
+    private String simplify(){
+        return Utility.getStringFromKey(sender) + Utility.getStringFromKey(recipient) + Float.toString(value) + total;
+    }
+
+    /** =====
+     * Generates cryptographic (one-way) hash for the current transaction using the Secure Hash Algorithm (512)
+     * Note, this aims to provide data integrity and origin authenticity before signing as well.
+     *
+     * @return Hex string output of the hash function
+     */
+    private String hash(){
+        total++;
+        return Utility.SHA512(this.simplify());
+    }
+
+    /** =====
+     * Returns the sum of transaction input values
+     *
+     * @return Total spendable amount
+     */
+    private float getInputsValue() {
         float total = 0;
         for(TransactionOutput i : inputs) {
             total += i.value;
         }
         return total;
-    }
-
-    // Method for compressing Transaction information as String (for signing and verifying)
-    private String simplify(){
-        return Utility.getStringFromKey(sender) + Utility.getStringFromKey(recipient) + Float.toString(value) + total;
-    }
-
-    // Method for returning human-readable form of this transaction
-    public String toString(){
-        return new GsonBuilder().setPrettyPrinting().create().toJson(this);
     }
 }
