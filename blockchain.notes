@@ -31,7 +31,7 @@ containing previous hash, nonce and merkle root), and look through the merkle ro
 
 3. How should transaction fees work?
 	a. My initial thought goes to making transaction fees be a flexible amount based on the average amount
-ever sent on the network. That is, if you use the network for more expensive payments on average, your fee
+ever sent on the network. That 	is, if you use the network for more expensive payments on average, your fee
 will be larger. Is this the right approach?
 
 	1. Greater fees mean greater incentive for miners to include for those who put spend more (+)
@@ -41,4 +41,6 @@ will be larger. Is this the right approach?
 	b. A part of me thinks every users fees should be calculates individually - kind of like a personal tax 
 	based a bunch of factors: wallet balance (higher income = higher fee can afford), residence country human 
 	development index (higher HDI = higher fee can afford), etc. 
+
+
 

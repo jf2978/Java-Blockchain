@@ -1,6 +1,8 @@
 package com.jf2978;
 
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -18,7 +20,6 @@ public class Main {
 
     public static void main(String[] args) {
         Security.addProvider(new BouncyCastleProvider());
-        
         // TODO: List erroneous use cases + ensure graceful exit
 
         // Create wallets
@@ -61,7 +62,7 @@ public class Main {
         // Print Blockchain state + information
         System.out.println("Alice's Final Balance: " + alice.balance());
         System.out.println("Bob's Final Balance: " + bob.balance());
-        System.out.println(SimpleBlockChain.prettyPrint());
+        SimpleBlockChain.prettyPrint();
     }
 
     /** =====
@@ -124,9 +125,44 @@ public class Main {
 
             @return String to be printed
          */
-        public static String prettyPrint(){
+        public static void prettyPrint(){
             // TODO: Implement custom SimpleBlockChain prettyPrint() method
-            return new GsonBuilder().setPrettyPrinting().create().toJson(blockchain);
+            ascii();
+            Gson gson = new Gson();
+            StringBuilder blockNo = new StringBuilder();
+            StringBuilder times = new StringBuilder();
+            StringBuilder sig = new StringBuilder();
+            StringBuilder prev = new StringBuilder();
+            StringBuilder merkles = new StringBuilder();
+            StringBuilder transactions = new StringBuilder();
+
+            int count = 0;
+            for(Block block : blockchain){
+                blockNo.append(String.format("// %s //      ", StringUtils.center(Integer.toString(count++), 41)));
+                times.append(String.format("// Timestamp: %s //      ", StringUtils.center(block.timestamp, 30)));
+                prev.append(String.format("// Previous: %s //      ", StringUtils.center(block.shortPrevious(), 31)));
+                sig.append(String.format("// Signature: %s //  →  ", StringUtils.center(block.shortSignature(), 30)));
+                transactions.append(String.format("// Transactions: %s //     ", StringUtils.center(block.shortTransactions(), 27)));
+                merkles.append(String.format("// Merkle Root: %s //     ", StringUtils.center(block.shortMerkle(), 28)));
+            }
+            String header = StringUtils.leftPad("", 47, "/");
+            System.out.println(StringUtils.repeat(header, "      ", blockchain.size()));
+            System.out.println(blockNo);
+            System.out.println(times);
+            System.out.println(prev);
+            System.out.println(sig + " [next] ");
+            System.out.println(transactions);
+            System.out.println(merkles);
+            System.out.println(StringUtils.repeat(header, "     ", blockchain.size()));
+        }
+
+        public static void ascii(){
+            System.out.println("___.   .__                 __          .__           .__        ");
+            System.out.println("\\_ |__ |  |   ____   ____ |  | __ ____ |  |__ _____  |__| ____  ");
+            System.out.println(" | __ \\|  |  /  _ \\_/ ___\\|  |/ // ___\\|  |  \\\\__  \\ |  |/    \\");
+            System.out.println(" | \\_\\ \\  |_(  <_> )  \\___|    <\\  \\___|   Y  \\/ __ \\|  |   |  \\");
+            System.out.println(" |___  /____/\\____/ \\___  >__|_ \\\\___  >___|  (____  /__|___|  /");
+            System.out.println("     \\/                 \\/     \\/    \\/     \\/     \\/        \\/ \n");
         }
     }
 }

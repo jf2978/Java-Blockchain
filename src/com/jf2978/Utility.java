@@ -34,7 +34,7 @@ public class Utility {
 
             // Byte -> Hex conversion
             for (byte b : hash) {
-                sb.append(String.format("%02X ", b));
+                sb.append(String.format("%02X", b));
             }
         } catch (NoSuchAlgorithmException e) {
             System.out.println(e.getMessage());

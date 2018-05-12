@@ -52,6 +52,41 @@ public class Block {
         return new GsonBuilder().setPrettyPrinting().create().toJson(this);
     }
 
+    public String shortSignature(){
+        int length = signature.length();
+        return signature.substring(0,5) + signature.substring(length/2 - 2, length/2 + 2) + signature.substring(length - 5, length);
+    }
+
+    public String shortPrevious(){
+        if(previousHash.length() == 1){
+            return previousHash;
+        }
+        int length = previousHash.length();
+        return previousHash.substring(0,5) + previousHash.substring(length/2 - 2, length/2 + 2) + previousHash.substring(length - 5, length);
+    }
+
+    public String shortMerkle(){
+        if(merkleRoot.length() == 1){
+            return merkleRoot;
+        }
+        int length = merkleRoot.length();
+        return merkleRoot.substring(0,5) + merkleRoot.substring(length/2 - 2, length/2 + 2) + merkleRoot.substring(length - 5, length);
+    }
+
+    public String shortTransactions(){
+        StringBuilder sb = new StringBuilder();
+        sb.append("< ");
+        for(Transaction tx : transactions){
+            if(sb.length() > 15){
+                sb.append("...");
+                break;
+            }
+            String id = tx.id.length() == 1 ? "" : "[" + tx.id.substring(0,5) + "]";
+            sb.append(id);
+        }
+        sb.append(" >");
+        return sb.toString();
+    }
     /** =====
      * "Mines" current block. That is, using CPU power to continuously produce hash signatures that match
      * the blockchain's current difficulty - Proof of Work
