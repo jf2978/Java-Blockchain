@@ -10,9 +10,9 @@ import java.security.PublicKey;
 import java.security.Security;
 import java.util.*;
 
-/** =====
- * Wrapper class for main() entry point to the blockchain program - typically includes a variety of
- * test cases for the classes within the package
+/**
+ * ===== Wrapper class for main() entry point to the blockchain program -
+ * typically includes a variety of test cases for the classes within the package
  *
  * @author jf2978
  */
@@ -28,7 +28,7 @@ public class Main {
         Wallet coinbase = new Wallet();
 
         // Create genesis transaction to release funds into the blockchain
-        Transaction genesisTransaction = new Transaction("0",coinbase.eK, alice.eK, 100f);
+        Transaction genesisTransaction = new Transaction("0", coinbase.eK, alice.eK, 100f);
         genesisTransaction.sign(coinbase.dK);
         SimpleBlockChain.UTXOs.put(alice.eK, genesisTransaction.outputs);
 
@@ -39,16 +39,17 @@ public class Main {
 
         System.out.printf("Alice Balance: %s\n", alice.balance());
 
-        // If Alice tries to send money she doesn't have, should return null Transaction obj
+        // If Alice tries to send money she doesn't have, should return null Transaction
+        // obj
         Transaction toBob = alice.send(bob.eK, 500f);
-        if(toBob != null){
+        if (toBob != null) {
             toBob.sign(alice.dK);
         }
         System.out.printf("Alice Balance: %s\n", alice.balance());
 
         // Test Successful transaction, should be fine
         Transaction toBob2 = alice.send(bob.eK, 50f);
-        if(toBob2 != null){
+        if (toBob2 != null) {
             toBob2.sign(alice.dK);
         }
         System.out.printf("Alice Balance: %s\n", alice.balance());
@@ -65,20 +66,22 @@ public class Main {
         SimpleBlockChain.prettyPrint();
     }
 
-    /** =====
-     * The SimpleBlockChain static nested class provides overarching structure to our transactions; primarily
-     * created without regards to a real-world network of nodes
-    */
+    /**
+     * ===== The SimpleBlockChain static nested class provides overarching structure
+     * to our transactions; primarily created without regards to a real-world
+     * network of nodes
+     */
     public static class SimpleBlockChain {
 
         // Static Variables
         public static List<Block> blockchain = new ArrayList<>();
-        public static Map<PublicKey, Set<TransactionOutput>> UTXOs = new HashMap<>(); // eK -> unspent transaction outputs
+        public static Map<PublicKey, Set<TransactionOutput>> UTXOs = new HashMap<>(); // eK -> unspent transaction
+                                                                                      // outputs
         public static Map<PublicKey, Float> fees = new HashMap<>(); // eK -> individualized fee rate
         public static int difficulty = 2; // "# of 0s" needed to solve PoW
 
-        /** =====
-         * Adds Block object to SimpleBlockChain
+        /**
+         * ===== Adds Block object to SimpleBlockChain
          *
          * @param block Block to be mined + added
          */
@@ -87,8 +90,9 @@ public class Main {
             blockchain.add(block);
         }
 
-        /** =====
-         * Checks if current state of blockchain is valid (current/prev hashes + proof-of-work)
+        /**
+         * ===== Checks if current state of blockchain is valid (current/prev hashes +
+         * proof-of-work)
          *
          * @return Validity flag/result
          */
@@ -112,7 +116,7 @@ public class Main {
                 }
 
                 // Proof-of-work
-                if(!current.signature.substring( 0, difficulty).equals(target)) {
+                if (!current.signature.substring(0, difficulty).equals(target)) {
                     System.out.println("This block hasn't been mined (un-verified by the proof-of-work)");
                     return false;
                 }
@@ -120,12 +124,12 @@ public class Main {
             return true;
         }
 
-        /** =====
-            Prints current blockchain state
-
-            @return String to be printed
+        /**
+         * ===== Prints current blockchain state
+         *
+         * @return String to be printed
          */
-        public static void prettyPrint(){
+        public static void prettyPrint() {
             // TODO: Implement custom SimpleBlockChain prettyPrint() method
             ascii();
             Gson gson = new Gson();
@@ -137,13 +141,15 @@ public class Main {
             StringBuilder transactions = new StringBuilder();
 
             int count = 0;
-            for(Block block : blockchain){
+            for (Block block : blockchain) {
                 blockNo.append(String.format("// %s //      ", StringUtils.center(Integer.toString(count++), 41)));
                 times.append(String.format("// Timestamp: %s //      ", StringUtils.center(block.timestamp, 30)));
                 prev.append(String.format("// Previous: %s //      ", StringUtils.center(block.shortPrevious(), 31)));
                 sig.append(String.format("// Signature: %s //  →  ", StringUtils.center(block.shortSignature(), 30)));
-                transactions.append(String.format("// Transactions: %s //     ", StringUtils.center(block.shortTransactions(), 27)));
-                merkles.append(String.format("// Merkle Root: %s //     ", StringUtils.center(block.shortMerkle(), 28)));
+                transactions.append(String.format("// Transactions: %s //     ",
+                        StringUtils.center(block.shortTransactions(), 27)));
+                merkles.append(
+                        String.format("// Merkle Root: %s //     ", StringUtils.center(block.shortMerkle(), 28)));
             }
             String header = StringUtils.leftPad("", 47, "/");
             System.out.println(StringUtils.repeat(header, "      ", blockchain.size()));
@@ -156,7 +162,7 @@ public class Main {
             System.out.println(StringUtils.repeat(header, "     ", blockchain.size()));
         }
 
-        public static void ascii(){
+        public static void ascii() {
             System.out.println("___.   .__                 __          .__           .__        ");
             System.out.println("\\_ |__ |  |   ____   ____ |  | __ ____ |  |__ _____  |__| ____  ");
             System.out.println(" | __ \\|  |  /  _ \\_/ ___\\|  |/ // ___\\|  |  \\\\__  \\ |  |/    \\");
